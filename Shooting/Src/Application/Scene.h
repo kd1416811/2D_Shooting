@@ -4,11 +4,7 @@ class Scene
 {
 private:
 
-	// テクスチャ ・・・ 画像データ
-	KdTexture charaTex;
-
-	// 行列 ・・・ 座標などの情報
-	Math::Matrix matrix;
+	
 
 public:
 

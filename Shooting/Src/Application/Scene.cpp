@@ -1,27 +1,25 @@
 #include "main.h"
 #include "Scene.h"
+#include"Scene/GameScene.h"
 
 void Scene::Draw2D()
 {
-	// •¶š—ñ•\¦
-	SHADER.m_spriteShader.DrawString(0, 0, "Hello World", Math::Vector4(1, 1, 0, 1));
+	GAMESCENE.Draw();
 }
 
 void Scene::Update()
 {
-	
+	GAMESCENE.Update();
 }
 
 void Scene::Init()
 {
-	// ‰æ‘œ‚Ì“Ç‚İ‚İˆ—
-	charaTex.Load("player.png");
+	GAMESCENE.Init();
 }
 
 void Scene::Release()
 {
-	// ‰æ‘œ‚Ì‰ğ•úˆ—
-	charaTex.Release();
+	
 }
 
 void Scene::ImGuiUpdate()
