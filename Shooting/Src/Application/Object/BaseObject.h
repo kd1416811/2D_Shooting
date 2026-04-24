@@ -20,5 +20,7 @@ protected:
 	Math::Matrix	m_trans;
 	Math::Matrix	m_mat;
 	Math::Vector3	m_pos = {};
+	float shotTimer = 0.0f;      // タイマー
+	float shotInterval = 0.5f;   // 発射間隔（0.5秒に1発）
 	bool			m_aliveFlg = true;
 };

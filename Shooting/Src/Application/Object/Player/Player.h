@@ -5,7 +5,7 @@ class Player : public BaseObject
 {
 public:
 
-	Player(){}
+	Player() {}
 	~Player() { Release(); }
 
 	void Update();

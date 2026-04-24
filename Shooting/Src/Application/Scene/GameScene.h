@@ -24,18 +24,16 @@ private:
 
 	//Player* m_player = nullptr;
 	//スマートポインタ
-	std::unique_ptr<Player> m_player;
+	std::unique_ptr<Player> m_player = nullptr;
 
 private:
 
 	GameScene();
 
 public:
-	static GameScene& GetInstance()
+	static GameScene& Instance()
 	{
 		static GameScene instance;
 		return instance;
 	}
 };
-
-#define GAMESCENE GameScene::GetInstance()
