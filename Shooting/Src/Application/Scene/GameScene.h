@@ -1,7 +1,7 @@
 #pragma once
-#include <memory>
 
 class Player;
+class SkillManager;
 
 class GameScene
 {
@@ -25,6 +25,7 @@ private:
 	//Player* m_player = nullptr;
 	//スマートポインタ
 	std::unique_ptr<Player> m_player = nullptr;
+	std::unique_ptr<SkillManager> m_skillManager = nullptr;
 
 private:
 

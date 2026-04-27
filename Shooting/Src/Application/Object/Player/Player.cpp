@@ -3,19 +3,19 @@
 void Player::Update()
 {
 	// 移動
-	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+	if (GetAsyncKeyState('A') & 0x8000)
 	{
 		m_pos.x -= 5;
 	}
-	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+	if (GetAsyncKeyState('D') & 0x8000)
 	{
 		m_pos.x += 5;
 	}
-	if (GetAsyncKeyState(VK_UP) & 0x8000)
+	if (GetAsyncKeyState('W') & 0x8000)
 	{
 		m_pos.y += 5;
 	}
-	if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+	if (GetAsyncKeyState('S') & 0x8000)
 	{
 		m_pos.y -= 5;
 	}
@@ -34,7 +34,7 @@ void Player::Draw()
 void Player::Init()
 {
 	m_tex.Load("Textures/player.png");
-	m_pos = {};
+	m_pos = {-600,0};
 	m_aliveFlg = true;
 }
 

@@ -55,6 +55,12 @@
     <Filter Include="Src\Application\Scene">
       <UniqueIdentifier>{b28096cc-86b1-475e-b072-4ba5e1837cf2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\Object\Bullet">
+      <UniqueIdentifier>{6b82e305-69d6-49e8-bcbe-911dd1fb04a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\Skill">
+      <UniqueIdentifier>{b78c5437-65d0-40a0-91a3-185401f90395}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -162,6 +168,12 @@
     <ClInclude Include="Src\Application\Scene\GameScene.h">
       <Filter>Src\Application\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Object\Skill\SkillManager.h">
+      <Filter>Src\Application\Object\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Skill\SkillGauge.h">
+      <Filter>Src\Application\Object\Skill</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -238,6 +250,12 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Scene\GameScene.cpp">
       <Filter>Src\Application\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Skill\SkillManager.cpp">
+      <Filter>Src\Application\Object\Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Skill\SkillGauge.cpp">
+      <Filter>Src\Application\Object\Skill</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
