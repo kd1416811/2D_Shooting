@@ -6,7 +6,7 @@ SkillManager::~SkillManager() = default;
 
 void SkillManager::Init()
 {
-	deg = 0;//真上からスタート
+	startDeg = 0;//真上からスタート
 	alpha = 0.2f;
 	alphaDirection = 1;
 
@@ -113,10 +113,13 @@ void SkillManager::Draw()
 	// ==========================================
 	for (const auto& gauge : m_skillGauge)
 	{
-		gauge->Draw(m_circleVertices, deg, false);
+		gauge->Draw(m_circleVertices, startDeg, false);
 	}
 
-	m_ultGauge->Draw(m_circleVertices, deg, true);
+	//==========================================
+	//ウルト用
+	//==========================================
+	m_ultGauge->Draw(m_circleVertices, startDeg, true);
 
 
 	// --- 3. 前面（飾り）の描画 ---
@@ -125,6 +128,9 @@ void SkillManager::Draw()
 	SHADER.m_spriteShader.DrawTex(&m_costTex, Math::Rectangle{ 0,0,300,302 }, 1.0f);
 }
 
+//=========================--
+//円の頂点データの作成
+//===========================
 void SkillManager::InitCircleVertices()
 {
 	for (int i = 0; i <= 360; ++i) {

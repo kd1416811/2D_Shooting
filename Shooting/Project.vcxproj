@@ -160,6 +160,7 @@
     <ClInclude Include="..\Library\tinygltf\stb_image_write.h" />
     <ClInclude Include="..\Library\tinygltf\tiny_gltf.h" />
     <ClInclude Include="Src\Application\Object\BaseObject.h" />
+    <ClInclude Include="Src\Application\Object\Bullet\Bullet.h" />
     <ClInclude Include="Src\Application\Object\Enemy\Enemy.h" />
     <ClInclude Include="Src\Application\Object\Player\Player.h" />
     <ClInclude Include="Src\Application\Object\Skill\SkillGauge.h" />
@@ -191,6 +192,7 @@
     <ClCompile Include="..\Library\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="..\Library\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Src\Application\Object\BaseObject.cpp" />
+    <ClCompile Include="Src\Application\Object\Bullet\Bullet.cpp" />
     <ClCompile Include="Src\Application\Object\Enemy\Enemy.cpp" />
     <ClCompile Include="Src\Application\Object\Player\Player.cpp" />
     <ClCompile Include="Src\Application\Object\Skill\SkillGauge.cpp" />
