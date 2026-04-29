@@ -1,6 +1,8 @@
 #pragma once
 
-class Player;
+//class Player;
+class BaseObject;
+class BulletManager;
 class SkillManager;
 
 class GameScene
@@ -22,10 +24,13 @@ private:
 
 	void Release();
 
-	//Player* m_player = nullptr;
 	//スマートポインタ
-	std::unique_ptr<Player> m_player = nullptr;
-	std::unique_ptr<SkillManager> m_skillManager = nullptr;
+	std::shared_ptr<BaseObject>		m_player		= nullptr;
+	std::shared_ptr<BaseObject>		m_enemy			= nullptr;
+
+
+	std::shared_ptr<BulletManager>	m_bulletManager	= nullptr;
+	std::unique_ptr<SkillManager>	m_skillManager	= nullptr;
 
 private:
 

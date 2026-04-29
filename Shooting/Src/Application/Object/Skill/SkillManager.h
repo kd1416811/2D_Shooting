@@ -21,7 +21,7 @@ private:
 	// --- 定数・構造体定義 ---
 	static constexpr int	SKILL_COUNT		= 4;
 	static constexpr float	BASE_SKILL_COST = 200.0f;
-	static constexpr float	ULT_MAX_COST	= 12.0f;
+	static constexpr float	ULT_MAX_COST	= 8.0f;
 
 	// スキルごとの固有設定をまとめる構造体
 	struct SkillParam {

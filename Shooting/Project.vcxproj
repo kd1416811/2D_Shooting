@@ -71,6 +71,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <ForcedIncludeFiles>Pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalOptions>/nodefaultlib:"LIBCMT"
@@ -161,6 +162,7 @@
     <ClInclude Include="..\Library\tinygltf\tiny_gltf.h" />
     <ClInclude Include="Src\Application\Object\BaseObject.h" />
     <ClInclude Include="Src\Application\Object\Bullet\Bullet.h" />
+    <ClInclude Include="Src\Application\Object\Bullet\BulletManager.h" />
     <ClInclude Include="Src\Application\Object\Enemy\Enemy.h" />
     <ClInclude Include="Src\Application\Object\Player\Player.h" />
     <ClInclude Include="Src\Application\Object\Skill\SkillGauge.h" />
@@ -193,6 +195,7 @@
     <ClCompile Include="..\Library\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Src\Application\Object\BaseObject.cpp" />
     <ClCompile Include="Src\Application\Object\Bullet\Bullet.cpp" />
+    <ClCompile Include="Src\Application\Object\Bullet\BulletManager.cpp" />
     <ClCompile Include="Src\Application\Object\Enemy\Enemy.cpp" />
     <ClCompile Include="Src\Application\Object\Player\Player.cpp" />
     <ClCompile Include="Src\Application\Object\Skill\SkillGauge.cpp" />

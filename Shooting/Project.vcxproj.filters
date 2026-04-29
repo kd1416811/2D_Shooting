@@ -177,6 +177,9 @@
     <ClInclude Include="Src\Application\Object\Bullet\Bullet.h">
       <Filter>Src\Application\Object\Bullet</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Object\Bullet\BulletManager.h">
+      <Filter>Src\Application\Object\Bullet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -261,6 +264,9 @@
       <Filter>Src\Application\Object\Skill</Filter>
     </ClCompile>
     <ClCompile Include="Src\Application\Object\Bullet\Bullet.cpp">
+      <Filter>Src\Application\Object\Bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Bullet\BulletManager.cpp">
       <Filter>Src\Application\Object\Bullet</Filter>
     </ClCompile>
   </ItemGroup>
