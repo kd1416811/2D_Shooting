@@ -1,65 +1,78 @@
-#include "GameScene.h"
-#include "../Object/Player/Player.h"
-#include"../Object/Bullet/BulletManager.h"
+#include "gameScene.h"
+#include"../Object/Player/Player.h"
 #include"../Object/Enemy/Enemy.h"
 #include"../Object/Skill/SkillManager.h"
 
-GameScene::GameScene() = default;
-GameScene::~GameScene() = default;
-
-void GameScene::Init()
+void gameScene::Update()
 {
-	//================================
-	//実体を生成(new)
-	// ================================
-	if (!m_bulletManager)	m_bulletManager = std::make_shared<BulletManager>();
-	if (!m_skillManager)	m_skillManager	= std::make_unique<SkillManager>();
-
-	if (!m_player)
+	//全オブジェクトの更新関数を呼ぶ
+	for (int i = 0; i < (int)m_objList.size(); ++i)
 	{
-		auto player = std::make_shared<Player>();
-		player->SetBulletManager(m_bulletManager);
-		m_player = player;
+		if (m_objList[i] && m_objList[i]->GetAliveFlg())
+		{
+			m_objList[i]->Update();
+		}
 	}
 
-	if (!m_enemy) m_enemy	= std::make_shared<Enemy>();
-	
-	 
+	//不要になったオブジェクト削除
+	RemoveDeadObjects();
 
-	//==========================
-	//初期化
-	//==========================
-	if (m_player)	m_player->Init();
-	if (m_enemy)	m_enemy	->Init();
-
-	if (m_skillManager)m_skillManager->Init();
+	//m_skillManager->Update();
 }
 
-void GameScene::Draw()
+void gameScene::Draw()
 {
-	if (m_player) m_player->Draw();
-	if (m_enemy)  m_enemy ->Draw();
+	//全オブジェクトの描画関数を呼ぶ
+	for (int i = 0; i < (int)m_objList.size(); ++i)
+	{
+		if (m_objList[i] && m_objList[i]->GetAliveFlg())
+		{
+			m_objList[i]->Draw();
+		}
+	}
 
-	if (m_bulletManager)m_bulletManager->Draw();
-	if (m_skillManager)m_skillManager->Draw();
+	m_skillManager->Draw();
 }
 
-void GameScene::Update()
+void gameScene::Init()
 {
-	if (m_player) m_player->Update();
-	if (m_enemy)  m_enemy ->Update();
+	// プレイヤーの生成
+	CreateObject<Player>();
 
-	if (m_bulletManager)m_bulletManager->Update();
-	if (m_skillManager)m_skillManager->Update();
+	// 敵の生成
+	CreateObject<Enemy>();
+
+	m_skillManager = std::make_shared<SkillManager>();
+	m_skillManager->Init();
 }
 
-void GameScene::Release()
+void gameScene::AddObject(std::shared_ptr<BaseObject> _obj)
 {
-	//===========================
-	//実体を削除(Release)
-	//===========================
-	m_player = nullptr;
-	m_enemy = nullptr;
-	m_bulletManager = nullptr;
+	if (!_obj)return;
+
+	m_objList.push_back(_obj);
+}
+
+void gameScene::Release()
+{
+	m_objList.clear();
+
 	m_skillManager = nullptr;
+}
+
+void gameScene::RemoveDeadObjects()
+{
+	for (auto it = m_objList.begin(); it != m_objList.end();)
+	{
+
+		if (!(*it)->GetAliveFlg())
+		{
+			it = m_objList.erase(it);// リストから削除
+		}
+		else
+		{
+			++it;
+		}
+
+	}
 }

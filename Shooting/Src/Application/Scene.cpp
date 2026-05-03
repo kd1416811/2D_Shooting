@@ -4,17 +4,17 @@
 
 void Scene::Draw2D()
 {
-	GameScene::Instance().Draw();
+	gameScene::Instance().Draw();
 }
 
 void Scene::Update()
 {
-	GameScene::Instance().Update();
+	gameScene::Instance().Update();
 }
 
 void Scene::Init()
 {
-	GameScene::Instance().Init();
+	gameScene::Instance().Init();
 }
 
 void Scene::Release()

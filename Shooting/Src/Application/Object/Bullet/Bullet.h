@@ -1,36 +1,42 @@
 #pragma once
 #include"../BaseObject.h"
 
-enum class BulletType
-{
-	Normal,
-	homing,
-	Wave,
-	Laser
-};
+//前方宣言
+class gameScene;
 
-class Bullet: public BaseObject
+class Bullet :public BaseObject
 {
 public:
 
-	Bullet();
-	~Bullet() override { Release(); }
-
-	// 初期化用：発射位置と方向を受け取る
-	void Init(const Math::Vector2& startPos, const Math::Vector2& dir, float speed);
+	Bullet() {}
+	~Bullet() { Release(); }
 
 	void Update() override;
-	void Draw() override;
+	void Draw()override;
+	void Init()override;
+
+	void OnHit() override;
+
+	// シーン情報をセット
+	void SetOwner(gameScene* _owner) override { m_owner = _owner; }
+
+
+	void SetPos(Math::Vector3& pos) { m_pos = pos; }//playerの座標を受け取る
+
 
 private:
 
-	static constexpr float BulletMargin = 16.0f;	//弾の大きさ
-
-	void Release() override;
+	void Release()override;
 
 	// 弾固有の移動ロジック
 	void Move();
 
 	// 画面外判定などの寿命管理
 	void CheckLifeSpan();
+
+	//弾と敵との当たり判定
+	void CheakCollision();
+
+	//行列更新
+	void UpdateMatrix();
 };

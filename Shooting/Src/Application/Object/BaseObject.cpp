@@ -1,7 +1,5 @@
 ﻿#include "BaseObject.h"
 
-BaseObject::BaseObject() = default;
-
 void BaseObject::Update()
 {}
 

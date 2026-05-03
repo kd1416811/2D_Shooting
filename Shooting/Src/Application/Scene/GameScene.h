@@ -1,45 +1,58 @@
 #pragma once
 
-//class Player;
-class BaseObject;
-class BulletManager;
+//前方宣言
 class SkillManager;
+class BaseObject;
 
-class GameScene
+class gameScene
 {
 public:
 
-	
-	~GameScene();
+	~gameScene() { Release(); }
 
-	// コピーと代入を禁止（シングルトンの保護）
-	GameScene(const GameScene&) = delete;
-	GameScene& operator=(const GameScene&) = delete;
-
-	void Init();
-	void Draw();
 	void Update();
+	void Draw();
+	void Init();
+
+	void AddObject(std::shared_ptr<BaseObject> _obj);
+
+	//全オブジェクトのリストを格納
+	const std::vector<std::shared_ptr<BaseObject>>& GetObjList() { return m_objList; }
 
 private:
 
 	void Release();
 
-	//スマートポインタ
-	std::shared_ptr<BaseObject>		m_player		= nullptr;
-	std::shared_ptr<BaseObject>		m_enemy			= nullptr;
+	void RemoveDeadObjects();
 
+	//========================
+	//	テンプレートInit関数
+	//========================
+	template <typename T>
+	void CreateObject()
+	{
+		auto obj = std::make_shared<T>();	// インスタンス生成
+		obj->Init();						//初期化
+		obj->SetOwner(this);
+		m_objList.push_back(obj);			// リストへ追加
 
-	std::shared_ptr<BulletManager>	m_bulletManager	= nullptr;
-	std::unique_ptr<SkillManager>	m_skillManager	= nullptr;
+		return;
+	}
+
+	//全オブジェクトを可変長配列で管理
+	std::vector<std::shared_ptr<BaseObject>>m_objList;
+
+	std::shared_ptr<SkillManager>m_skillManager = nullptr;
 
 private:
 
-	GameScene();
+	gameScene() {}
 
 public:
-	static GameScene& Instance()
+	static gameScene& Instance()
 	{
-		static GameScene instance;
+		static gameScene instance;
 		return instance;
 	}
+
 };
