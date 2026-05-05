@@ -17,7 +17,7 @@ void gameScene::Update()
 	//不要になったオブジェクト削除
 	RemoveDeadObjects();
 
-	//m_skillManager->Update();
+	m_skillManager->Update();
 }
 
 void gameScene::Draw()
@@ -40,7 +40,21 @@ void gameScene::Init()
 	CreateObject<Player>();
 
 	// 敵の生成
-	CreateObject<Enemy>();
+	if (m_Stage % 3 == 1)	//1,4,7
+	{
+		auto enemy = CreateObject<Enemy>();
+		enemy->SetType(Boss_1, m_Stage);
+	}
+	else if (m_Stage % 3 == 2)	//2,5,8
+	{
+		auto enemy = CreateObject<Enemy>();
+		enemy->SetType(Boss_2, m_Stage);
+	}
+	else if (m_Stage % 3 == 0)	//3,6,9
+	{
+		auto enemy = CreateObject<Enemy>();
+		enemy->SetType(Boss_3, m_Stage);
+	}
 
 	m_skillManager = std::make_shared<SkillManager>();
 	m_skillManager->Init();

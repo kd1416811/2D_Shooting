@@ -55,7 +55,7 @@ void SkillManager::Init()
 		GaugeType::Charge, 
 		true);
 
-	// ULTは自動回復しない（通常スキル使用で増える）ため、速度は0
+	// ULTは自動回復しない（通常スキル使用で増える）ため、速度は0に固定する
 	m_ultGauge->SetChargeSpeed(0.0f);
 
 	Frame = 0;
@@ -98,14 +98,13 @@ void SkillManager::Update()
 void SkillManager::Draw()
 {
 	// --- 1. 背景テクスチャの描画 ---
-	//土台となる枠などを描画
 	SHADER.m_spriteShader.SetMatrix(m_mat);
 	SHADER.m_spriteShader.DrawTex(&m_costTex, Math::Rectangle{ 300,0,300,302 }, 1.0f);
 
 	color = { 0,0,0,0.2f };
 
 	// --- 2. ゲージ（中身）の描画 ---
-	// ゲージはスクリーン座標で描くため、一旦行列をリセット
+	// 行列をリセット
 	SHADER.m_spriteShader.SetMatrix(Math::Matrix::Identity);
 
 	//===========================================

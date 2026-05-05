@@ -1,0 +1,4 @@
+ID,x,y,HP,HPBar,Attack,textureName
+0,500,0,1000000,10000,500,enemy.png
+1,500,0,1000000,10000,500,enemy.png
+2,500,0,1000000,10000,500,enemy.png

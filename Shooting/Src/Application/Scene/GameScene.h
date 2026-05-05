@@ -29,20 +29,23 @@ private:
 	//	テンプレートInit関数
 	//========================
 	template <typename T>
-	void CreateObject()
+	std::shared_ptr<T> CreateObject()
 	{
 		auto obj = std::make_shared<T>();	// インスタンス生成
 		obj->Init();						//初期化
 		obj->SetOwner(this);
 		m_objList.push_back(obj);			// リストへ追加
 
-		return;
+		return obj;
 	}
 
 	//全オブジェクトを可変長配列で管理
 	std::vector<std::shared_ptr<BaseObject>>m_objList;
 
 	std::shared_ptr<SkillManager>m_skillManager = nullptr;
+
+	// 例：現在のステージ。本来はセーブデータや前のシーンから受け取る
+	int m_Stage = 2;
 
 private:
 
