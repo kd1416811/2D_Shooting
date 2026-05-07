@@ -10,6 +10,16 @@ enum class BulletType
 	Laser
 };
 
+struct PlayerParameter
+{
+	int			id;
+	Math::Vector3 startPos;		//初期座標
+	long long	maxHp;			//最大のHP
+	long long	nowHp;			//現在の残りHP
+	long long   atk;
+	int			def;
+};
+
 class gameScene;
 
 class Player : public BaseObject
@@ -24,7 +34,9 @@ public:
 	void Draw()override;
 	void Init()override;
 
-	void OnHit() override;
+	void OnHit(long long damage) override;
+
+	void SetType(int id);
 
 	// シーン情報をセット
 	void SetOwner(gameScene* _owner)override { m_owner = _owner; }
@@ -50,8 +62,14 @@ private:
 	//行列更新
 	void UpdateMatrix();
 
+	void LoadParameter();
+
 	//弾の挙動の初期種類
 	BulletType m_currentShotType = BulletType::Normal;
+
+	// IDをキーにしてデータを保存
+	static std::map<int, PlayerParameter> s_playerMaster;
+	PlayerParameter m_PlayerParam;
 
 	static constexpr float NormalTimeRatio = 1.0f;		//1.0倍...通常倍率
 };

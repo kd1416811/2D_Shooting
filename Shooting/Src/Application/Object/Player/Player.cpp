@@ -2,6 +2,8 @@
 #include "../../Scene/gameScene.h"
 #include"../Bullet/Bullet.h"
 
+std::map<int, PlayerParameter> Player::s_playerMaster;
+
 void Player::Update()
 {
 	if (!m_aliveFlg) return;
@@ -20,7 +22,6 @@ void Player::Update()
 
 	// 5. 行列の更新
 	UpdateMatrix();
-
 }
 
 void Player::Draw()
@@ -32,7 +33,7 @@ void Player::Draw()
 void Player::Init()
 {
 	m_tex.Load("Textures/Player/player.png");
-	m_pos = { -600.0f,0.0f,0.0f };
+	if(s_playerMaster.empty())LoadParameter();
 	m_dir = { 0.0f,0.0f,0.0f };
 	m_deg = 270;
 	m_speed = 5.0f;
@@ -43,9 +44,29 @@ void Player::Init()
 	m_objType = objectType::player;
 }
 
-void Player::OnHit()
+void Player::OnHit(long long damage)
 {
+	m_PlayerParam.nowHp -= damage;
 
+	if (m_PlayerParam.nowHp <= 0)
+	{
+		m_PlayerParam.nowHp = 0;
+		m_aliveFlg = false;
+	}
+}
+
+void Player::SetType(int id)
+{	
+	auto it = s_playerMaster.find(id);
+
+	if (it != s_playerMaster.end()) 
+	{
+		m_PlayerParam = it->second;
+
+		m_pos = { m_PlayerParam.startPos.x,m_PlayerParam.startPos.y,0.0f };
+
+		m_aliveFlg = true;
+	}
 }
 
 void Player::Release()
@@ -72,6 +93,9 @@ void Player::Shoot()
 		newBullet->Init();
 		newBullet->SetPos(m_pos);
 		newBullet->SetOwner(m_owner);
+
+		// 自分の攻撃力を弾に受け渡す！
+		newBullet->SetAtk(m_PlayerParam.atk);
 
 		// リストに追加
 		m_owner->AddObject(newBullet);
@@ -129,10 +153,10 @@ void Player::UpdateCheakCollision()
 			if (v.Length() < HitDistance)
 			{
 				//Hit時の処理
-				obj->OnHit();
+				//obj->OnHit();
 
 				// プレイヤー自身もダメージを受けるなら
-
+				OnHit(m_PlayerParam.atk);
 			}
 		}
 	}
@@ -150,4 +174,37 @@ void Player::UpdateMatrix()
 	m_rotation = Math::Matrix::CreateRotationZ(ToRadians(m_deg));
 	m_trans = Math::Matrix::CreateTranslation(m_pos.x, m_pos.y, m_pos.z);
 	m_mat = m_rotation * m_trans;
+}
+
+void Player::LoadParameter()
+{
+	FILE* fp;
+
+	if (fopen_s(&fp, "Data/Player/Player.csv", "r") == 0)
+	{
+		char dummy[255];
+		int	 LoadingNum = 6;	//読み込む数だけ増やす
+		long long hp = 0, atk = 0;
+		float x = 0, y = 0;
+		int def = 0, id = 0;
+
+		// ヘッダー（1行目）を読み飛ばす
+		fgets(dummy, sizeof(dummy), fp);
+
+		while (fscanf_s(fp, "%d,%f,%f,%lld,%lld,%d",
+			&id,&x, &y, &hp,&atk ,&def)== LoadingNum)
+		{
+			PlayerParameter p;
+			p.id = id;
+			p.startPos.x = x;
+			p.startPos.y = y;
+			p.maxHp = hp;
+			p.nowHp = hp;
+			p.atk = atk;
+			p.def = def;
+			s_playerMaster[id] = p; // IDをキーに保存
+		}
+
+		fclose(fp);
+	}
 }

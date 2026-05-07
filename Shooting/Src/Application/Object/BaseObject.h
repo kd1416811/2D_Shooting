@@ -10,7 +10,8 @@ public:
 		None,
 		player,
 		enemy,
-		bullet
+		bullet,
+		damageEffect
 	};
 
 	BaseObject() {}
@@ -19,8 +20,8 @@ public:
 	virtual void Update();
 	virtual void Draw();
 	virtual void Init();
-
-	virtual void OnHit() {}
+	
+	virtual void OnHit(long long damage) { (void)damage; }
 
 	virtual void SetOwner(gameScene* _owner) {}
 
@@ -56,15 +57,19 @@ protected:
 	static constexpr float	ShotInterval = 0.2f;		//発射間隔(0.2秒)
 
 	KdTexture		m_tex;
+	Math::Matrix	m_scale;
 	Math::Matrix	m_rotation;
 	Math::Matrix	m_trans;
 	Math::Matrix	m_mat;
 	Math::Vector3	m_pos = {};
 	Math::Vector3   m_dir = {}; //移動方向
 	int				m_deg;		//角度
+	int				m_lifeTime;
+	float			m_ObjScale;
 	float			m_speed;
 	float			m_shotTimer;
 	float			m_deltaTime;
+	float			m_alpha;
 	bool			m_aliveFlg = true;
 
 	objectType		m_objType = objectType::None;

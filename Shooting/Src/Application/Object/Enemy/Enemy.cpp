@@ -1,4 +1,6 @@
 #include "Enemy.h"
+#include"../Effect/DamageEffect.h"
+#include"../../Scene/GameScene.h"
 #include<string.h>
 std::map<int, EnemyParameter> Enemy::s_enemyMaster;
 
@@ -30,15 +32,35 @@ void Enemy::Draw()
 void Enemy::Init()
 {
 	if (s_enemyMaster.empty()) LoadParameter();
-
-	m_HpBarTex.Load("Textures/Enemy/HPBar.png");
-
+	m_NumberTex.Load("Textures/number2.png");
+	m_AtkDamage = 0;
 	m_objType = objectType::enemy;
 }
 
-void Enemy::OnHit()
+void Enemy::OnHit(long long damage)
 {
-	m_aliveFlg = false;
+	//与ダメージ計算
+	m_AtkDamage = (damage - m_EnemyParam.def);
+
+	m_EnemyParam.nowHp -= m_AtkDamage;
+
+	//　--ダメージ数値表示--
+	if (m_owner)
+	{
+		//インスタンス生成
+		auto effect = std::make_shared<DamageEffect>();
+	//初期化
+		effect->Init();
+		effect->SetOwner(m_owner);
+		effect->SetDamage(m_AtkDamage, m_pos);
+		m_owner->AddObject(effect);
+	}
+
+	if (m_EnemyParam.nowHp <= 0)
+	{
+		m_EnemyParam.nowHp = 0;
+		m_aliveFlg = false;
+	}
 }
 
 void Enemy::Release()
@@ -54,26 +76,28 @@ void Enemy::SetType(int id,int stageLevel)
 	if (it != s_enemyMaster.end())
 	{
 		// 構造体の値をまるごとコピー
-		m_param = it->second; 
+		m_EnemyParam = it->second;
 
-		std::string fullPath = "Textures/Enemy/" + std::string(m_param.texName);
+		m_pos = { m_EnemyParam.startPos.x,m_EnemyParam.startPos.y,0.0f };
+
+		std::string fullPath = "Textures/Enemy/" + std::string(m_EnemyParam.texName);
 		m_tex.Load(fullPath.c_str());
-
+		m_HpBarTex.Load("Textures/Enemy/HPBar.png");
 
 		// --- 等比インフレの計算 ---
-		float Rate = 1.35f; // 1ステージごとに1.2倍にする設定
+		float Rate = 1.35f; // 1ステージごとに1.35倍にする設定
 		float totalScale = std::pow(Rate, (float)(stageLevel - 1));
 
 		// 各ステータスに倍率を適用
 		// HPの更新
-		m_param.maxHp = (long long)(m_param.maxHp * totalScale);
-		m_param.nowHp = m_param.maxHp;
+		m_EnemyParam.maxHp = (long long)(m_EnemyParam.maxHp * totalScale);
+		m_EnemyParam.nowHp = m_EnemyParam.maxHp;
 
 		// ゲージの厚みも増やす(HPバー1本あたりの量もインフレさせる)
-		m_param.hpBar = (long long)(m_param.hpBar * totalScale); 
+		m_EnemyParam.hpBar = (long long)(m_EnemyParam.hpBar * totalScale);
 		
 		// 攻撃力の更新
-		m_param.attack = (int)(m_param.attack * totalScale);
+		m_EnemyParam.attack = (int)(m_EnemyParam.attack * totalScale);
 
 		m_aliveFlg = true;
 	}
@@ -86,8 +110,8 @@ void Enemy::LoadParameter()
 	if (fopen_s(&fp, "Data/Enemy/Enemy.csv", "r") == 0)
 	{
 		char dummy[255];
-		int	 LoadingNum = 7;	//読み込む数だけ増やす
-		int  id = 0, atk = 0;
+		int	 LoadingNum = 8;	//読み込む数だけ増やす
+		int  id = 0, atk = 0, def = 0;
 		float x = 0, y = 0;
 		long long hp = 0, hpBar = 0;
 		char tName[64];
@@ -95,18 +119,20 @@ void Enemy::LoadParameter()
 		// ヘッダー（1行目）を読み飛ばす
 		fgets(dummy, sizeof(dummy), fp);
 
-		while (fscanf_s(fp, "%d,%f,%f,%lld,%lld,%d,%s",
-			&id, &x, &y, &hp, &hpBar, &atk, tName, (unsigned int)(sizeof(tName) - 1)) == LoadingNum)
+		while (fscanf_s(fp, "%d,%f,%f,%lld,%lld,%d,%d,%s",
+			&id, &x, &y, &hp, &hpBar, &atk ,&def, tName, (unsigned int)(sizeof(tName) - 1)) == LoadingNum)
 		{
 			tName[sizeof(tName) - 1] = '\0';
 
 			EnemyParameter p;
 			p.id = id;
-			m_pos = { x,y,0.0f };
+			p.startPos.x = x;
+			p.startPos.y = y;
 			p.maxHp = hp;
 			p.nowHp = hp;
 			p.hpBar = hpBar;
 			p.attack = atk;
+			p.def = def;
 			strcpy_s(p.texName, sizeof(p.texName), tName);
 
 			// マップに保存（ID 0 のデータ、ID 1 のデータ...）
@@ -121,9 +147,11 @@ void Enemy::DrawHpBar()
 {
 	int BarWidth = 800, BarHeight = 20;
 
-	int currentBarIdx = (int)(m_param.nowHp / m_param.hpBar);
-	float ratio = (float)(m_param.nowHp % m_param.hpBar) / m_param.hpBar;
-	if (m_param.nowHp > 0 && ratio == 0.0f)
+	//現在のHPを1本あたりのHPで割った数
+	int currentBarIdx = (int)(m_EnemyParam.nowHp / m_EnemyParam.hpBar);
+
+	float ratio = (float)((double)(m_EnemyParam.nowHp % m_EnemyParam.hpBar) / m_EnemyParam.hpBar);
+	if (m_EnemyParam.nowHp > 0 && ratio == 0.0f)
 	{
 		ratio = 1.0f;
 		currentBarIdx--;
@@ -132,7 +160,7 @@ void Enemy::DrawHpBar()
 	Math::Vector3 barPos = { -380.0f, 300.0f, 0.0f };
 	Math::Vector2 pivotLeft = { 0.0f, 0.5f }; // 左端を基準にする
 
-	// 色リスト (Math::Color型で定義し直す必要があります)
+	// 色リスト
 	Math::Color colors[] = {
 		{ 1.0f, 0.0f, 0.0f, 1.0f }, // 赤
 		{ 1.0f, 0.5f, 0.0f, 1.0f }, // 橙
@@ -145,26 +173,56 @@ void Enemy::DrawHpBar()
 	Math::Color bgColor = colors[(currentBarIdx - 1 + 5) % 5];
 	Math::Color black = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-	// --- 3. 描画処理 ---
+	//-- 残りのHPbarの本数表示 --
+	const int numW = 64;	//1文字の横幅
+	const int numH = 64;	//1文字の高さ
+	int displayCount = currentBarIdx + 1;// 残りの本数を算出
+	std::string countStr = std::to_string(displayCount);
 
-	// 行列をリセット（画面固定UIにする場合）
-	SHADER.m_spriteShader.SetMatrix(Math::Matrix::Identity);
+	Math::Vector3 textPos = { barPos.x + BarWidth + 15.0f, barPos.y, 0.0f };
+	
+	// --- 描画処理 ---
 
-	// ① 土台 (黒)
+	// 土台 (黒)
 	SHADER.m_spriteShader.DrawTex(&m_HpBarTex, (int)barPos.x, (int)barPos.y, BarWidth, BarHeight, nullptr, &black, pivotLeft);
 
-	// ② 下の層 (背景色。2本目以降がある場合)
+	// 下の層 (背景色。2本目以降がある場合)
 	if (currentBarIdx > 0) {
 		SHADER.m_spriteShader.DrawTex(&m_HpBarTex, (int)barPos.x, (int)barPos.y, BarWidth, BarHeight, nullptr, &bgColor, pivotLeft);
 	}
 
-	// ③ 現在の層 (割合に応じて幅を可変させる)
+	// 現在の層 (割合に応じて幅を可変させる)
 	int drawWidth = (int)(BarWidth * ratio);
 
-	// 元画像のサイズ（テクスチャの実際の解像度）に合わせてSrcRectを作る
+	// 画像のサイズに合わせてSrcRectを作る
 	int texW = 800;
 	int texH = 20;
 	Math::Rectangle srcRect = { 0, 0, (long)(texW * ratio), (long)texH };
 
 	SHADER.m_spriteShader.DrawTex(&m_HpBarTex, (int)barPos.x, (int)barPos.y, drawWidth, BarHeight, &srcRect, &currentColor, pivotLeft);
+
+	// 最大HPが1本分より多いときだけ「×」を表示
+	if (m_EnemyParam.maxHp > m_EnemyParam.hpBar)
+	{
+		// 「×」マークを描画
+		Math::Rectangle srcRect = { 0, 0, numW, numH };
+		SHADER.m_spriteShader.DrawTex(&m_NumberTex, textPos.x, textPos.y, Half(numW), Half(numH), &srcRect, &currentColor, pivotLeft);
+
+		// 次の文字の描画位置をずらす
+		textPos.x += (numW * 0.5f); // 文字間隔を少し詰める調整
+
+		for (char c : countStr)
+		{
+			//char型からint型に型変換
+			int digit = c - '0';
+
+			int srcX = (digit + 1) * numW;
+
+			Math::Rectangle srcRect = { (long)srcX, 0, numW, numH };
+
+			SHADER.m_spriteShader.DrawTex(&m_NumberTex, textPos.x, textPos.y, Half(numW), Half(numH), &srcRect, &currentColor, pivotLeft);
+
+			textPos.x += (numW * 0.5f);
+		}
+	}
 }

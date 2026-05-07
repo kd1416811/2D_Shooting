@@ -37,7 +37,8 @@ void gameScene::Draw()
 void gameScene::Init()
 {
 	// プレイヤーの生成
-	CreateObject<Player>();
+	auto player = CreateObject<Player>();
+	player->SetType(0);
 
 	// 敵の生成
 	if (m_Stage % 3 == 1)	//1,4,7

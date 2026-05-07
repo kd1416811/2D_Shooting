@@ -61,6 +61,9 @@
     <Filter Include="Src\Application\Object\Skill">
       <UniqueIdentifier>{b78c5437-65d0-40a0-91a3-185401f90395}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\Object\Effect">
+      <UniqueIdentifier>{96e3a229-69c0-494d-9913-bc81cbe8adcf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -177,6 +180,9 @@
     <ClInclude Include="Src\Application\Object\Bullet\Bullet.h">
       <Filter>Src\Application\Object\Bullet</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Object\Effect\DamageEffect.h">
+      <Filter>Src\Application\Object\Effect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -262,6 +268,9 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Object\Bullet\Bullet.cpp">
       <Filter>Src\Application\Object\Bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Effect\DamageEffect.cpp">
+      <Filter>Src\Application\Object\Effect</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

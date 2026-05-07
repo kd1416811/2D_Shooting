@@ -38,7 +38,7 @@ void Bullet::Init()
 	m_tex.Load("Textures/Bullet/bullet.png");
 }
 
-void Bullet::OnHit()
+void Bullet::OnHit(long long damage)
 {
 	m_aliveFlg = false;
 }
@@ -63,8 +63,15 @@ void Bullet::CheckLifeSpan()
 
 void Bullet::CheakCollision()
 {
-	for (auto& obj : m_owner->GetObjList())
+	if (!m_owner) return;
+
+	//const auto& objList = m_owner->GetObjList();
+	auto objList = m_owner->GetObjList();
+
+	for (auto& obj : objList)
 	{
+		if (!obj || !obj->GetAliveFlg()) continue;
+		
 		//オブジェクトリストの中から敵とだけ当たり判定
 		if (obj->GetObjType() == objectType::enemy)
 		{
@@ -78,9 +85,11 @@ void Bullet::CheakCollision()
 			if (v.Length() < HitDistance)
 			{
 				//Hit時の処理
-				obj->OnHit();
+				obj->OnHit(m_atk);
 
-				OnHit();
+				OnHit(m_atk);
+
+				//return;
 			}
 		}
 	}

@@ -121,7 +121,8 @@ void SkillGauge::AddCost(float amount)
 	}
 
 
-	if (m_nowCost < 0.0f) {
+	if (m_nowCost < 0.0f)
+	{
 		m_nowCost = 0.0f;
 	}
 }
