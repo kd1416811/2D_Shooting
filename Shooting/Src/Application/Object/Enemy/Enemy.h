@@ -1,8 +1,6 @@
 #pragma once 
 #include"../BaseObject.h"
 
-class DamageEffect;
-
 enum enemyType
 {
 	Boss_1,
@@ -19,6 +17,7 @@ struct EnemyParameter
 	long long	hpBar;			//ゲージ1本あたりのHP量
 	int			attack;			//攻撃力
 	int			def;			//守備力
+	int			Resistance;		//攻撃耐性
 	char		texName[64];	//敵の画像フォルダ名格納
 };
 
@@ -33,13 +32,23 @@ public:
 	void Draw()override;
 	void Init()override;
 
-	void OnHit(long long damage) override;
+	//void OnHit(long long damage) override;
+	void OnHit(long long damage, bool b_critical);
 
 	// ★ IDを指定してステータスを自分にコピーする関数
 	void SetType(int id,int stageLevel);
 
 	// シーン情報をセット
 	void SetOwner(gameScene* _owner)override { m_owner = _owner; }
+
+	//攻撃力を取得
+	int GetAtk() const { return m_EnemyParam.attack; }
+
+	// 防御力を取得
+	int GetDef() const { return m_EnemyParam.def; }
+
+	// 耐性を取得
+	int GetResist() const { return m_EnemyParam.Resistance; }
 
 private:
 
@@ -52,13 +61,11 @@ private:
 	void DrawHpBar();
 
 	// IDをキーにしてデータを保存
-	static std::map<int, EnemyParameter> s_enemyMaster; 
+	static std::map<int, EnemyParameter> s_enemyMaster;
 
 	// この個体のステータス
 	EnemyParameter m_EnemyParam;
 
 	KdTexture m_HpBarTex;
 	KdTexture m_NumberTex;
-
-	long long m_AtkDamage;//与ダメージ
 };

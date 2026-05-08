@@ -1,6 +1,7 @@
 #include "Enemy.h"
 #include"../Effect/DamageEffect.h"
 #include"../../Scene/GameScene.h"
+#include"../../Concept/define.h"
 #include<string.h>
 std::map<int, EnemyParameter> Enemy::s_enemyMaster;
 
@@ -21,28 +22,22 @@ void Enemy::Draw()
 	if (!m_aliveFlg)return;
 
 	SHADER.m_spriteShader.SetMatrix(m_mat);
-	SHADER.m_spriteShader.DrawTex(&m_tex, { 0,0,(int)EnemyMargin,(int)EnemyMargin }, 1.0f);
-
-
+	SHADER.m_spriteShader.DrawTex(&m_tex, { 0,0,(int)Config::EnemyMargin,(int)Config::EnemyMargin }, 1.0f);
+	
 	SHADER.m_spriteShader.SetMatrix(Math::Matrix::Identity);
 	DrawHpBar();
-	
 }
 
 void Enemy::Init()
 {
 	if (s_enemyMaster.empty()) LoadParameter();
 	m_NumberTex.Load("Textures/number2.png");
-	m_AtkDamage = 0;
 	m_objType = objectType::enemy;
 }
 
-void Enemy::OnHit(long long damage)
+void Enemy::OnHit(long long damage, bool b_critical)
 {
-	//与ダメージ計算
-	m_AtkDamage = (damage - m_EnemyParam.def);
-
-	m_EnemyParam.nowHp -= m_AtkDamage;
+	m_EnemyParam.nowHp -= damage;
 
 	//　--ダメージ数値表示--
 	if (m_owner)
@@ -52,7 +47,7 @@ void Enemy::OnHit(long long damage)
 	//初期化
 		effect->Init();
 		effect->SetOwner(m_owner);
-		effect->SetDamage(m_AtkDamage, m_pos);
+		effect->SetDamage(damage, m_pos,b_critical);
 		m_owner->AddObject(effect);
 	}
 
@@ -90,14 +85,14 @@ void Enemy::SetType(int id,int stageLevel)
 
 		// 各ステータスに倍率を適用
 		// HPの更新
-		m_EnemyParam.maxHp = (long long)(m_EnemyParam.maxHp * totalScale);
+		m_EnemyParam.maxHp = (long long)(m_EnemyParam.maxHp * (totalScale + 0.25f));//1.6倍
 		m_EnemyParam.nowHp = m_EnemyParam.maxHp;
 
 		// ゲージの厚みも増やす(HPバー1本あたりの量もインフレさせる)
-		m_EnemyParam.hpBar = (long long)(m_EnemyParam.hpBar * totalScale);
+		m_EnemyParam.hpBar = (long long)(m_EnemyParam.hpBar * (totalScale + 0.25f));//1.6倍
 		
 		// 攻撃力の更新
-		m_EnemyParam.attack = (int)(m_EnemyParam.attack * totalScale);
+		m_EnemyParam.attack = (int)(m_EnemyParam.attack * totalScale);//1.35倍
 
 		m_aliveFlg = true;
 	}
@@ -110,8 +105,8 @@ void Enemy::LoadParameter()
 	if (fopen_s(&fp, "Data/Enemy/Enemy.csv", "r") == 0)
 	{
 		char dummy[255];
-		int	 LoadingNum = 8;	//読み込む数だけ増やす
-		int  id = 0, atk = 0, def = 0;
+		int	 LoadingNum = 9;	//読み込む数だけ増やす
+		int  id = 0, atk = 0, def = 0, Resistance = 0;
 		float x = 0, y = 0;
 		long long hp = 0, hpBar = 0;
 		char tName[64];
@@ -119,8 +114,8 @@ void Enemy::LoadParameter()
 		// ヘッダー（1行目）を読み飛ばす
 		fgets(dummy, sizeof(dummy), fp);
 
-		while (fscanf_s(fp, "%d,%f,%f,%lld,%lld,%d,%d,%s",
-			&id, &x, &y, &hp, &hpBar, &atk ,&def, tName, (unsigned int)(sizeof(tName) - 1)) == LoadingNum)
+		while (fscanf_s(fp, "%d,%f,%f,%lld,%lld,%d,%d,%d,%s",
+			&id, &x, &y, &hp, &hpBar, &atk ,&def,&Resistance, tName, (unsigned int)(sizeof(tName) - 1)) == LoadingNum)
 		{
 			tName[sizeof(tName) - 1] = '\0';
 
@@ -133,6 +128,7 @@ void Enemy::LoadParameter()
 			p.hpBar = hpBar;
 			p.attack = atk;
 			p.def = def;
+			p.Resistance = Resistance;
 			strcpy_s(p.texName, sizeof(p.texName), tName);
 
 			// マップに保存（ID 0 のデータ、ID 1 のデータ...）
@@ -158,7 +154,7 @@ void Enemy::DrawHpBar()
 	}
 	//画面中央の一番上に表示
 	Math::Vector3 barPos = { -380.0f, 300.0f, 0.0f };
-	Math::Vector2 pivotLeft = { 0.0f, 0.5f }; // 左端を基準にする
+	Math::Vector2 pivotLeft = { 0.0f, 1.0f }; // 左端を基準にする
 
 	// 色リスト
 	Math::Color colors[] = {
@@ -174,8 +170,10 @@ void Enemy::DrawHpBar()
 	Math::Color black = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	//-- 残りのHPbarの本数表示 --
-	const int numW = 64;	//1文字の横幅
-	const int numH = 64;	//1文字の高さ
+	int numW = 64;	//1文字の横幅
+	int numH = 64;	//1文字の高さ
+	int halfNumW = numW * 0.5f;
+	int halfNumH = numH * 0.5f;
 	int displayCount = currentBarIdx + 1;// 残りの本数を算出
 	std::string countStr = std::to_string(displayCount);
 
@@ -206,7 +204,7 @@ void Enemy::DrawHpBar()
 	{
 		// 「×」マークを描画
 		Math::Rectangle srcRect = { 0, 0, numW, numH };
-		SHADER.m_spriteShader.DrawTex(&m_NumberTex, textPos.x, textPos.y, Half(numW), Half(numH), &srcRect, &currentColor, pivotLeft);
+		SHADER.m_spriteShader.DrawTex(&m_NumberTex, textPos.x, textPos.y, halfNumW, halfNumH, &srcRect, &currentColor, pivotLeft);
 
 		// 次の文字の描画位置をずらす
 		textPos.x += (numW * 0.5f); // 文字間隔を少し詰める調整
@@ -220,7 +218,7 @@ void Enemy::DrawHpBar()
 
 			Math::Rectangle srcRect = { (long)srcX, 0, numW, numH };
 
-			SHADER.m_spriteShader.DrawTex(&m_NumberTex, textPos.x, textPos.y, Half(numW), Half(numH), &srcRect, &currentColor, pivotLeft);
+			SHADER.m_spriteShader.DrawTex(&m_NumberTex, textPos.x, textPos.y, halfNumW, halfNumH, &srcRect, &currentColor, pivotLeft);
 
 			textPos.x += (numW * 0.5f);
 		}

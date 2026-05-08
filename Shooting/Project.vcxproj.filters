@@ -64,6 +64,9 @@
     <Filter Include="Src\Application\Object\Effect">
       <UniqueIdentifier>{96e3a229-69c0-494d-9913-bc81cbe8adcf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\Concept">
+      <UniqueIdentifier>{a9702207-f549-4382-9c6d-3d87643d6afc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -183,6 +186,12 @@
     <ClInclude Include="Src\Application\Object\Effect\DamageEffect.h">
       <Filter>Src\Application\Object\Effect</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Concept\define.h">
+      <Filter>Src\Application\Concept</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Concept\DamageCalculation.h">
+      <Filter>Src\Application\Concept</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -271,6 +280,9 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Object\Effect\DamageEffect.cpp">
       <Filter>Src\Application\Object\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Concept\DamageCalculation.cpp">
+      <Filter>Src\Application\Concept</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

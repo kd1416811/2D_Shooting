@@ -12,7 +12,7 @@ public:
 	void Draw()override;
 	void Update()override;
 
-	void SetDamage(long long damage, const Math::Vector3& pos);
+	void SetDamage(long long damage, const Math::Vector3& pos, bool b_critical);
 
 private:
 
@@ -20,6 +20,7 @@ private:
 	std::string FormatComma(long long value);
 
 	long long m_damage;
+	bool m_criticalFlg;
 
 	static KdTexture s_numberTex;
 };

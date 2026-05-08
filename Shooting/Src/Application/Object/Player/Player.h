@@ -18,6 +18,7 @@ struct PlayerParameter
 	long long	nowHp;			//現在の残りHP
 	long long   atk;
 	int			def;
+	int			Lv;			//プレイヤーレベル
 };
 
 class gameScene;
@@ -41,6 +42,15 @@ public:
 	// シーン情報をセット
 	void SetOwner(gameScene* _owner)override { m_owner = _owner; }
 
+	void AddCombo() { m_comboCount++; m_comboTimer = 2.0f; } // 2秒以内に次を当てれば継続
+	void ResetCombo() { m_comboCount = 0; }
+	int GetComboCount(){ return m_comboCount; }
+	int GetPlayerLv() { return m_PlayerParam.Lv; }
+
+
+	//発射間隔時間を受け取る
+	
+
 private:
 
 	void Release()override;
@@ -52,9 +62,6 @@ private:
 
 	//弾を毎フレーム打つ処理＆弾の制御
 	void UpdateShot();
-
-	//自機と敵との当たり判定
-	void UpdateCheakCollision();
 
 	//画面端制御
 	void UpdateMaxScreenEdge();
@@ -72,4 +79,7 @@ private:
 	PlayerParameter m_PlayerParam;
 
 	static constexpr float NormalTimeRatio = 1.0f;		//1.0倍...通常倍率
+
+	int m_comboCount;
+	float m_comboTimer;
 };

@@ -1,6 +1,8 @@
 ﻿#include "Player.h"
 #include "../../Scene/gameScene.h"
 #include"../Bullet/Bullet.h"
+#include"../../Concept/define.h"
+#include <algorithm>
 
 std::map<int, PlayerParameter> Player::s_playerMaster;
 
@@ -14,11 +16,17 @@ void Player::Update()
 	// 2. 攻撃処理
 	UpdateShot();
 
-	// 3. 当たり判定
-	UpdateCheakCollision();
-
-	// 4. 画面端制御
+	// 3. 画面端制御
 	UpdateMaxScreenEdge();
+
+
+	//コンボリセット
+	if (m_comboTimer > 0)
+	{
+		m_comboTimer -= m_deltaTime;
+
+		if (m_comboTimer <= 0) ResetCombo();
+	}
 
 	// 5. 行列の更新
 	UpdateMatrix();
@@ -27,7 +35,7 @@ void Player::Update()
 void Player::Draw()
 {
 	SHADER.m_spriteShader.SetMatrix(m_mat);
-	SHADER.m_spriteShader.DrawTex(&m_tex, { 0,0,(int)PlayerMargin,(int)PlayerMargin }, 1.0f);
+	SHADER.m_spriteShader.DrawTex(&m_tex, { 0,0,(int)Config::PlayerMargin,(int)Config::PlayerMargin }, 1.0f);
 }
 
 void Player::Init()
@@ -39,6 +47,9 @@ void Player::Init()
 	m_speed = 5.0f;
 	m_shotTimer = 0.0f;
 	m_deltaTime = 1.0f / 60.0f;
+	m_comboCount = 0;
+	m_comboTimer = 0.0f;
+	m_shotInterval = 0.3f;	//初期発射間隔(0.3秒)
 	m_aliveFlg = true;
 
 	m_objType = objectType::player;
@@ -77,6 +88,7 @@ void Player::Release()
 void Player::Shoot()
 {
 	std::shared_ptr<Bullet> newBullet = nullptr;
+	float skillRatio = 1.0f; //スキル倍率
 
 	switch (m_currentShotType)
 	{
@@ -84,6 +96,7 @@ void Player::Shoot()
 
 		// 弾を新しく生成
 		newBullet = std::make_shared<Bullet>();
+		skillRatio = 1.1f;
 
 		break;
 	}
@@ -95,7 +108,7 @@ void Player::Shoot()
 		newBullet->SetOwner(m_owner);
 
 		// 自分の攻撃力を弾に受け渡す！
-		newBullet->SetAtk(m_PlayerParam.atk);
+		newBullet->SetAtk(m_PlayerParam.atk * skillRatio);
 
 		// リストに追加
 		m_owner->AddObject(newBullet);
@@ -126,47 +139,31 @@ void Player::UpdateShot()
 {
 	// 通常は 1.0f 倍で進むタイマーを、移動方向によって増減させる
 	// 前進中は進みが遅くなり、後退中は速くなる
-	float timeScale = NormalTimeRatio - (m_dir.x * Half(NormalTimeRatio));
+	float HalfTime = NormalTimeRatio * 0.5f;
+	float timeScale = NormalTimeRatio - (m_dir.x * HalfTime);
 	m_shotTimer += m_deltaTime * timeScale;
 
-	if (m_shotTimer >= ShotInterval)
+	if (m_shotTimer >= m_shotInterval)
 	{
 		Shoot();
 		m_shotTimer = 0.0f;
 	}
 }
 
-void Player::UpdateCheakCollision()
-{
-	for (auto& obj : m_owner->GetObjList())
-	{
-		//オブジェクトリストの中から敵とだけ当たり判定
-		if (obj->GetObjType() == objectType::enemy)
-		{
-			// 敵の座標（ベクトル） - 自機の座標（ベクトル） = 敵へのベクトル（矢印）
-			Math::Vector3 v;
-			v = obj->GetPos() - m_pos;
-
-			float HitDistance = Half(PlayerMargin) + Half(EnemyMargin);
-
-			//球判定
-			if (v.Length() < HitDistance)
-			{
-				//Hit時の処理
-				//obj->OnHit();
-
-				// プレイヤー自身もダメージを受けるなら
-				OnHit(m_PlayerParam.atk);
-			}
-		}
-	}
-}
-
 void Player::UpdateMaxScreenEdge()
 {
 	//自機が画面外に行かないようにする
-	m_pos.x = (std::clamp)(m_pos.x, -(Half(SCREEN_WIDTH)) + Half(PlayerMargin), Half(SCREEN_WIDTH) - Half(PlayerMargin));
-	m_pos.y = (std::clamp)(m_pos.y, -(Half(SCREEN_HEIGHT)) + Half(PlayerMargin), Half(SCREEN_HEIGHT) - Half(PlayerMargin));
+	float screenHalf_W = Config::SCREEN_WIDTH * 0.5f;
+	float screenHalf_H = Config::SCREEN_HEIGHT * 0.5f;
+	float playerHalf = Config::PlayerMargin * 0.5f;
+
+	float minX = -(screenHalf_W) + playerHalf;
+	float maxX = screenHalf_W - playerHalf;
+	m_pos.x = (std::clamp)(m_pos.x, minX, maxX);
+
+	float minY = -(screenHalf_H) + playerHalf;
+	float maxY = screenHalf_H - playerHalf;
+	m_pos.y = (std::clamp)(m_pos.y, minY, maxY);
 }
 
 void Player::UpdateMatrix()
@@ -183,16 +180,16 @@ void Player::LoadParameter()
 	if (fopen_s(&fp, "Data/Player/Player.csv", "r") == 0)
 	{
 		char dummy[255];
-		int	 LoadingNum = 6;	//読み込む数だけ増やす
+		int	 LoadingNum = 7;	//読み込む数だけ増やす
 		long long hp = 0, atk = 0;
 		float x = 0, y = 0;
-		int def = 0, id = 0;
+		int def = 0, id = 0, Lv = 0;
 
 		// ヘッダー（1行目）を読み飛ばす
 		fgets(dummy, sizeof(dummy), fp);
 
-		while (fscanf_s(fp, "%d,%f,%f,%lld,%lld,%d",
-			&id,&x, &y, &hp,&atk ,&def)== LoadingNum)
+		while (fscanf_s(fp, "%d,%f,%f,%lld,%lld,%d,%d",
+			&id,&x, &y, &hp,&atk ,&def,&Lv)== LoadingNum)
 		{
 			PlayerParameter p;
 			p.id = id;
@@ -202,6 +199,7 @@ void Player::LoadParameter()
 			p.nowHp = hp;
 			p.atk = atk;
 			p.def = def;
+			p.Lv = Lv;
 			s_playerMaster[id] = p; // IDをキーに保存
 		}
 

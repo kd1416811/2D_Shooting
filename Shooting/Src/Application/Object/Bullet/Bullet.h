@@ -24,6 +24,9 @@ public:
 	void SetPos(Math::Vector3& pos) { m_pos = pos; }//playerの座標を受け取る
 	void SetAtk(long long atk) { m_atk = atk; } // ★プレイヤーの攻撃力をもらうための関数
 
+	//弾の攻撃力を取得する
+	long long GetAtk() const { return m_atk; }
+
 private:
 
 	void Release()override;
@@ -33,9 +36,6 @@ private:
 
 	// 画面外判定などの寿命管理
 	void CheckLifeSpan();
-
-	//弾と敵との当たり判定
-	void CheakCollision();
 
 	//行列更新
 	void UpdateMatrix();

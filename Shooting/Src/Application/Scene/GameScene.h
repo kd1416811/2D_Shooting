@@ -3,12 +3,14 @@
 //前方宣言
 class SkillManager;
 class BaseObject;
+class DamageCalculation;
+class Player;
 
 class gameScene
 {
 public:
 
-	~gameScene() { Release(); }
+	~gameScene();
 
 	void Update();
 	void Draw();
@@ -44,12 +46,19 @@ private:
 
 	std::shared_ptr<SkillManager>m_skillManager = nullptr;
 
+
+	std::shared_ptr<Player> m_playerPointer = nullptr; // プレイヤーへの参照
+	
+	std::shared_ptr<DamageCalculation> m_damageCalc; // 計算機を1つ持つ
+	
+	void CheckCollision(); // 当たり判定関数
+
 	// 例：現在のステージ。本来はセーブデータや前のシーンから受け取る
-	int m_Stage = 2;
+	int m_Stage = 1;
 
 private:
 
-	gameScene() {}
+	gameScene(){}
 
 public:
 	static gameScene& Instance()

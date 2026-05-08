@@ -1,5 +1,6 @@
 #include "Bullet.h"
-#include"../../Scene/gameScene.h"
+
+#include"../../Concept/define.h"
 
 void Bullet::Update()
 {
@@ -7,9 +8,6 @@ void Bullet::Update()
 
 	//移動
 	Move();
-
-	//当たり判定
-	CheakCollision();
 
 	//寿命、範囲チェック
 	CheckLifeSpan();
@@ -23,7 +21,7 @@ void Bullet::Draw()
 	if (!m_aliveFlg) return;
 
 	SHADER.m_spriteShader.SetMatrix(m_mat);
-	SHADER.m_spriteShader.DrawTex(&m_tex, { 0,0,(int)BulletMargin,(int)BulletMargin }, 1.0f);
+	SHADER.m_spriteShader.DrawTex(&m_tex, { 0,0,(int)Config::BulletMargin,(int)Config::BulletMargin }, 1.0f);
 }
 
 void Bullet::Init()
@@ -54,44 +52,15 @@ void Bullet::Move()
 
 void Bullet::CheckLifeSpan()
 {
-	if (m_pos.x < -(Half(SCREEN_WIDTH)) - BulletMargin || m_pos.x >(Half(SCREEN_WIDTH)) + BulletMargin ||
-		m_pos.y < -(Half(SCREEN_HEIGHT)) - BulletMargin || m_pos.y >(Half(SCREEN_HEIGHT)) + BulletMargin)
+	int screenHalf_W = One_Half(Config::SCREEN_WIDTH);
+	int screenHlaf_H = One_Half(Config::SCREEN_HEIGHT);
+
+	if (m_pos.x < -(screenHalf_W) - Config::BulletMargin ||
+		m_pos.x >(screenHalf_W) + Config::BulletMargin ||
+		m_pos.y < -(screenHlaf_H) - Config::BulletMargin ||
+		m_pos.y >(screenHlaf_H) + Config::BulletMargin)
 	{
 		m_aliveFlg = false;
-	}
-}
-
-void Bullet::CheakCollision()
-{
-	if (!m_owner) return;
-
-	//const auto& objList = m_owner->GetObjList();
-	auto objList = m_owner->GetObjList();
-
-	for (auto& obj : objList)
-	{
-		if (!obj || !obj->GetAliveFlg()) continue;
-		
-		//オブジェクトリストの中から敵とだけ当たり判定
-		if (obj->GetObjType() == objectType::enemy)
-		{
-			// 敵の座標（ベクトル） - 弾の座標（ベクトル） = 敵へのベクトル（矢印）
-			Math::Vector3 v;
-			v = obj->GetPos() - m_pos;
-
-			float HitDistance = Half(EnemyMargin) + Half(BulletMargin);
-
-			//球判定
-			if (v.Length() < HitDistance)
-			{
-				//Hit時の処理
-				obj->OnHit(m_atk);
-
-				OnHit(m_atk);
-
-				//return;
-			}
-		}
 	}
 }
 

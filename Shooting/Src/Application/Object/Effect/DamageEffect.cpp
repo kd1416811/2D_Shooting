@@ -1,4 +1,5 @@
 #include "DamageEffect.h"
+#include"../../Concept/define.h"
 KdTexture DamageEffect::s_numberTex;
 
 void DamageEffect::Init()
@@ -9,8 +10,10 @@ void DamageEffect::Init()
 	m_lifeTime = 60;	//表示時間(１秒)
 	m_deltaTime = 1.0f / 60.0f;
 	m_ObjScale = 1.0f;
+	m_criticalFlg = false;
 	m_aliveFlg = true;
 	s_numberTex.Load("Textures/number2.png");
+	srand(timeGetTime());
 
 	m_objType = objectType::damageEffect;
 }
@@ -27,6 +30,13 @@ void DamageEffect::Draw()
 	int numW = 64;
 	int numH = 64;
 	Math::Color col = { 1.0f,1.0f,0.0f,m_alpha };
+
+	//クリティカルなら虹色に
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> dist(0.0f,1.0f);
+	Math::Color critivalCol = {dist(gen),dist(gen) ,dist(gen) ,m_alpha};
+
 	Math::Vector2 pivot = { 0.5f,0.5f };
 
 	// --１文字ずつループ描画--
@@ -69,7 +79,14 @@ void DamageEffect::Draw()
 		Math::Rectangle rect = { texIdx * numW, 0, numW, numH };
 
 		// 行列をセットした後は、座標(0,0)描画する
-		SHADER.m_spriteShader.DrawTex(&s_numberTex, 0,0, Half(numW), Half(numH), &rect, &col, pivot);
+		if (!m_criticalFlg)
+		{
+			SHADER.m_spriteShader.DrawTex(&s_numberTex, 0, 0, One_Half(numW), One_Half(numH), &rect, &col, pivot);
+		}
+		else
+		{
+			SHADER.m_spriteShader.DrawTex(&s_numberTex, 0,0, One_Half(numW), One_Half(numH), &rect, &critivalCol, pivot);
+		}
 
 		currentX += charWidth;
 	}
@@ -95,11 +112,13 @@ void DamageEffect::Update()
 	m_mat = m_scale * m_trans;
 }
 
-void DamageEffect::SetDamage(long long damage, const Math::Vector3 & pos)
+void DamageEffect::SetDamage(long long damage, const Math::Vector3 & pos, bool b_critical)
 {
 	m_damage = damage;
 	m_pos = pos;
-	m_pos.x += (rand() % 40) - 20;
+	m_pos.x += (rand() % 60) - 30;
+	m_pos.y += 30;
+	m_criticalFlg = b_critical;
 }
 
 std::string DamageEffect::FormatComma(long long value)
