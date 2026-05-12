@@ -65,7 +65,15 @@ private:
 	Math::Color		color;
 	Math::Matrix	m_mat;
 	Math::Vector2	m_pos;
+	Math::Matrix	m_homingMat;
+	Math::Matrix	m_WaveMat;
+	Math::Matrix	m_AtkMat;
+	Math::Matrix	m_CritMat;
 	KdTexture		m_costTex;
+	KdTexture		m_homingTex;
+	KdTexture		m_WaveTex;
+	KdTexture		m_AtkTex;
+	KdTexture		m_CritTex;
 
 	//スキル実体
 	std::array<std::unique_ptr<SkillGauge>, SKILL_COUNT>	m_skillGauge;

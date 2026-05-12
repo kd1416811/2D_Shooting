@@ -59,6 +59,8 @@ bool SkillGauge::Update()
 
 void SkillGauge::Draw(const Math::Vector2* vertices, float startDeg, bool showMemory) const
 {
+	D3D.SetBlendState(BlendMode::Alpha);
+
 	// 1. ゲージの「塗り」部分
 
 	float ratio = (m_nowCost / m_maxCost);

@@ -32,6 +32,9 @@ private:
 
 	void CheckCollision(); // 当たり判定関数
 
+	void Combo();// コンボ管理関数
+	void ComboUpdate(); // コンボの更新関数
+
 	//========================
 	//	テンプレートInit関数
 	//========================
@@ -63,6 +66,7 @@ private:
 	KdTexture m_AtkBuffTex;
 	KdTexture m_CritBuffTex;
 	KdTexture m_StageClearTex;
+	KdTexture m_NumberTex; // 数字テクスチャ
 
 	float     m_clearLogoY = 500.0f;     // 画像の現在のY座標（画面外の上からスタート）
 	float     m_clearLogoAlpha = 0.0f;   // 画像の透明度（最初は見えない）
@@ -73,7 +77,12 @@ private:
 	float m_clearTimer = 0.0f;		// クリア後の経過時間
 	const float CLEAR_LIMIT = 4.0f; // 何秒待つか
 
-	
+	float m_comboScale = 3.0f;      // 現在の拡大率
+	float m_comboShake = 0.0f;      // 現在の揺れオフセット
+	int   m_lastComboCount = 0;     // 前フレームのコンボ数（変化検知用）
+
+	bool m_debugMode;//デバックモードフラグ
+
 	// 現在のステージ,SceneManagerから受け取る
 	int m_Stage;
 

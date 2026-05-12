@@ -96,6 +96,9 @@ void GameScene::Update()
 		}
 	}
 
+	//コンボ更新
+	ComboUpdate();
+
 	//一括当たり判定
 	CheckCollision();
 
@@ -120,7 +123,25 @@ void GameScene::Update()
 		m_addList.clear(); // 予約リストを空にする
 	}
 
-	//m_skillManager->Update();
+	
+	if (GetAsyncKeyState('G') & 0x0001) {
+		
+		m_debugMode = !m_debugMode;
+	}
+
+
+	//デバック用のショートカットキー
+	if (GetAsyncKeyState(VK_RETURN) & 0x0001) 
+	{
+		SceneManager::Instance().SetNextScene(SceneManager::Instance().SceneType::Result);
+		SceneManager::Instance().AddMaterials(
+			SceneManager::Instance().GetRewardMaterials()* SceneManager::Instance().GetCurrentStage());
+	}
+
+	if (GetAsyncKeyState(VK_BACK) & 0x0001)
+	{
+		SceneManager::Instance().SetNextScene(SceneManager::Instance().SceneType::Title);
+	}
 }
 
 void GameScene::Draw()
@@ -139,6 +160,9 @@ void GameScene::Draw()
 	}
 
 	m_skillManager->Draw();
+
+	//コンボ表示
+	Combo();
 
 	// --- バフアイコンの描画 (左上) ---
 	if (m_playerPointer) 
@@ -186,6 +210,8 @@ void GameScene::Draw()
 
 void GameScene::Init()
 {
+	m_debugMode = false;
+
 	// SceneManagerから現在のステージ番号をもらってくる
 	m_Stage = SceneManager::Instance().GetCurrentStage();
 
@@ -250,7 +276,7 @@ void GameScene::Init()
 	m_AtkBuffTex.Load("Textures/atkBuff.png");
 	m_CritBuffTex.Load("Textures/criticalBuff.png");
 	m_StageClearTex.Load("Textures/StageClear.png");
-
+	m_NumberTex.Load("Textures/number4.png");
 }
 
 void GameScene::AddObject(std::shared_ptr<BaseObject> _obj)
@@ -287,128 +313,202 @@ void GameScene::RemoveDeadObjects()
 
 void GameScene::CheckCollision()
 {
-	if (!m_playerPointer || !m_playerPointer->GetAliveFlg()) return;
+	if (!m_debugMode)
+	{
+		if (!m_playerPointer || !m_playerPointer->GetAliveFlg()) return;
 
-	// 生きているオブジェクトだけのコピーリストを作る（ループ中のメモリ破壊を防ぐ）
-	std::vector<std::shared_ptr<BaseObject>> currentObjects = m_objList;
+		// 生きているオブジェクトだけのコピーリストを作る（ループ中のメモリ破壊を防ぐ）
+		std::vector<std::shared_ptr<BaseObject>> currentObjects = m_objList;
 
-	for (auto& bullet_obj : currentObjects) {
-		// nullチェック、生存チェック、型チェック
-		if (!bullet_obj || !bullet_obj->GetAliveFlg()) continue;
-		if (bullet_obj->GetObjType() != BaseObject::objectType::bullet) continue;
+		for (auto& bullet_obj : currentObjects) {
+			// nullチェック、生存チェック、型チェック
+			if (!bullet_obj || !bullet_obj->GetAliveFlg()) continue;
+			if (bullet_obj->GetObjType() != BaseObject::objectType::bullet) continue;
 
-		auto bullet = std::static_pointer_cast<Bullet>(bullet_obj);
+			auto bullet = std::static_pointer_cast<Bullet>(bullet_obj);
 
+			for (auto& enemy_obj : currentObjects) {
+				if (!bullet->GetAliveFlg()) break; // 自分が死んだら即終了
+
+				if (!enemy_obj || !enemy_obj->GetAliveFlg()) continue;
+				if (enemy_obj->GetObjType() != BaseObject::objectType::enemy) continue;
+
+				auto enemy = std::static_pointer_cast<Enemy>(enemy_obj);
+
+				// --- ここに距離計算と当たり判定のロジックを書く ---
+				// --- 判定用座標を「見た目」と完全に一致させる ---
+				Math::Vector3 bPos = bullet->GetPos();
+
+				// 通常弾も描画位置（銃口の高さ）に合わせる
+				bPos.y += bullet->GetAddPos().y;
+
+				float dist = (bPos - enemy->GetPos()).Length();
+
+
+				float bulletHalf = (Config::BulletMargin_y * 0.5f);
+				float enemyHalf = (Config::EnemyMargin_x * 0.5f);
+
+				if (dist < (enemyHalf + bulletHalf))
+				{
+					if (enemy->IsInvincible()) continue;
+
+					//コンボ加算
+					m_playerPointer->AddCombo();
+
+					auto exp = CreateObject<Explosion>();
+					if (exp) { exp->SetPos(bPos); exp->Update(); }
+
+					// ダメージ計算
+					int damage = m_damageCalc->Calculator(
+						bullet->GetAtk(), enemy->GetDef(), enemy->GetResist(),
+						m_playerPointer->GetComboCount(), m_playerPointer->GetPlayerLv(),
+						m_playerPointer->GetHp(), enemy->GetHp(),
+						m_playerPointer->IsCritBuffActive()
+					);
+
+					// 敵にダメージを与える
+					enemy->OnHit(damage, m_damageCalc->CriticalJudg());
+
+					bullet->OnHit(0);
+					break;
+				}
+			}
+		}
+
+		///////////////////////////////////////
+		// --プレイヤーと敵の当たり判定--
+		///////////////////////////////////////
 		for (auto& enemy_obj : currentObjects) {
-			if (!bullet->GetAliveFlg()) break; // 自分が死んだら即終了
-
-			if (!enemy_obj || !enemy_obj->GetAliveFlg()) continue;
-			if (enemy_obj->GetObjType() != BaseObject::objectType::enemy) continue;
+			if (enemy_obj->GetObjType() != BaseObject::objectType::enemy ||
+				!enemy_obj->GetAliveFlg()) continue;
 
 			auto enemy = std::static_pointer_cast<Enemy>(enemy_obj);
 
-			// --- ここに距離計算と当たり判定のロジックを書く ---
-			// ※ bullet->OnHit(0) を呼んだら、必ず break すること
+			float dist = (m_playerPointer->GetPos() - enemy->GetPos()).Length();
 
-			// --- 判定用座標を「見た目」と完全に一致させる ---
-			Math::Vector3 bPos = bullet->GetPos();
-			if (bullet->HasStrategy()) {
-				//bPos.y += 100.0f; bPos.x += 340.0f;
-			}
-			else {
-				// 通常弾も描画位置（銃口の高さ）に合わせる
-				bPos.y += bullet->GetAddPos().y;
-			}
-
-			float dist = (bPos - enemy->GetPos()).Length();
-
-
-			float bulletHalf = (Config::BulletMargin_y * 0.5f);
-			float enemyHalf = (Config::EnemyMargin_x * 0.5f);
-
-			if (dist < (enemyHalf + bulletHalf))
-			{
-				if (enemy->IsInvincible()) continue;
-
-				m_playerPointer->AddCombo();
-
-				auto exp = CreateObject<Explosion>();
-				if (exp) { exp->SetPos(bPos); exp->Update(); }
-
-				// ダメージ計算
-				int damage = m_damageCalc->Calculator(
-					bullet->GetAtk(), enemy->GetDef(), enemy->GetResist(),
-					m_playerPointer->GetComboCount(), m_playerPointer->GetPlayerLv(),
-					m_playerPointer->GetHp(), enemy->GetHp(),
-					m_playerPointer->IsCritBuffActive()
-				);
-
-				// 敵にダメージを与える
-				enemy->OnHit(damage, m_damageCalc->CriticalJudg());
-
-				bullet->OnHit(0);
-				break;
-			}
-		}
-	}
-
-	///////////////////////////////////////
-	// --プレイヤーと敵の当たり判定--
-	///////////////////////////////////////
-	for (auto& enemy_obj : currentObjects) {
-		if (enemy_obj->GetObjType() != BaseObject::objectType::enemy ||
-			!enemy_obj->GetAliveFlg()) continue;
-
-		auto enemy = std::static_pointer_cast<Enemy>(enemy_obj);
-
-		float dist = (m_playerPointer->GetPos() - enemy->GetPos()).Length();
-
-		float playerHalf = Config::PlayerMargin * 0.5f;
-		float enemyHalf = Config::EnemyMargin_y;
-
-		if (dist < (playerHalf)+(enemyHalf)) {
-
-			// 敵の攻撃力を引数に渡して OnHit を呼ぶ
-			m_playerPointer->OnHit(enemy->GetAtk());
-		}
-	}
-
-	///////////////////////////////////////
-	// --プレイヤーと敵の弾当たり判定--
-	///////////////////////////////////////
-	for (auto& obj : currentObjects) {
-		if (!obj || !obj->GetAliveFlg()) continue;
-
-		// オブジェクトが「敵の弾」だった場合
-		if (obj->GetObjType() == BaseObject::objectType::enemyBullet) {
-			auto eBullet = std::static_pointer_cast<Bullet>(obj);
-
-			// プレイヤーとの距離を測る
-			float dist = (eBullet->GetPos() - m_playerPointer->GetPos()).Length();
 			float playerHalf = Config::PlayerMargin * 0.5f;
-			float enemyBulletHalf = Config::BulletMargin_y * 0.5f;
+			float enemyHalf = Config::EnemyMargin_y;
 
-			if (dist < (playerHalf)+(enemyBulletHalf))
-			{
+			if (dist < (playerHalf)+(enemyHalf)) {
 
-				int damage = m_damageCalc->Calculator(
-					eBullet->GetAtk(), m_playerPointer->GetDef(), 0,
-					m_playerPointer->GetComboCount(), m_playerPointer->GetPlayerLv(),
-					m_playerPointer->GetHp(), m_playerPointer->GetHp(),
-					m_playerPointer->IsCritBuffActive()
-				);
-
-				// プレイヤーにダメージ
-				m_playerPointer->OnHit(damage);
-
-				// 弾は消える
-				eBullet->OnHit(0);
-
-				// 爆発エフェクトなど
-				auto exp = CreateObject<Explosion>();
-				if (exp) { exp->SetPos(eBullet->GetPos()); exp->Update(); }
+				// 敵の攻撃力を引数に渡して OnHit を呼ぶ
+				m_playerPointer->OnHit(enemy->GetAtk());
 			}
 		}
 
+		///////////////////////////////////////
+		// --プレイヤーと敵の弾当たり判定--
+		///////////////////////////////////////
+
+		for (auto& obj : currentObjects) {
+			if (!obj || !obj->GetAliveFlg()) continue;
+
+			// オブジェクトが「敵の弾」だった場合
+			if (obj->GetObjType() == BaseObject::objectType::enemyBullet) {
+				auto eBullet = std::static_pointer_cast<Bullet>(obj);
+
+				// プレイヤーとの距離を測る
+				float dist = (eBullet->GetPos() - m_playerPointer->GetPos()).Length();
+				float playerHalf = Config::PlayerMargin * 0.5f;
+				float enemyBulletHalf = Config::BulletMargin_y * 0.5f;
+
+				if (dist < (playerHalf)+(enemyBulletHalf))
+				{
+					//ダメージ計算
+					int damage = m_damageCalc->Calculator(
+						eBullet->GetAtk(), m_playerPointer->GetDef(), 0,
+						m_playerPointer->GetComboCount(), m_playerPointer->GetPlayerLv(),
+						m_playerPointer->GetHp(), m_playerPointer->GetHp(),
+						m_playerPointer->IsCritBuffActive()
+					);
+
+					// プレイヤーにダメージ
+					m_playerPointer->OnHit(damage);
+
+					// 弾は消える
+					eBullet->OnHit(0);
+
+					// 爆発エフェクトなど
+					auto exp = CreateObject<Explosion>();
+					if (exp) { exp->SetPos(eBullet->GetPos()); exp->Update(); }
+				}
+			}
+
+		}
+	}
+}
+
+void GameScene::Combo()
+{
+	// --- コンボ数の描画 ---
+	if (m_playerPointer && m_playerPointer->GetComboCount() > 0)
+	{
+		int combo = m_playerPointer->GetComboCount();
+		std::string comboStr = std::to_string(combo);
+
+		// 表示位置 (画面右下など)
+		float comboAlpha = 1.0f;
+
+		float startX = 500.0f;
+		float startY = -250.0f + m_comboShake;
+		int numW = 64; // 数字テクスチャの1文字サイズ
+		int numH = 64;
+
+		Math::Matrix comboMat = Math::Matrix::Identity;
+
+		
+		for (int i = 0; i < comboStr.length(); ++i)
+		{
+			int digit = comboStr[i] - '0';
+			int srcX = (digit + 1) * numW; // 0番目が '×' なので +1
+
+			Math::Matrix scale = Math::Matrix::CreateScale(m_comboScale);
+			Math::Matrix trans = Math::Matrix::CreateTranslation(startX + (i * numW * 0.6f), startY, 0);
+			Math::Matrix mat = scale * trans;
+			SHADER.m_spriteShader.SetMatrix(mat);
+
+			Math::Rectangle srcRect = { (long)srcX, 0, (long)numW, (long)numH };
+			Math::Color color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白
+
+			// コンボ数が多いほど赤くするなど演出しても面白い
+			//if (combo >= 10) color = { 1.0f, 0.5f, 0.0f, 1.0f }; // オレンジ
+			//if (combo >= 20) color = { 1.0f, 0.0f, 0.0f, 1.0f }; // 赤
+
+			SHADER.m_spriteShader.DrawTex(&m_NumberTex, 0, 0, numW * 0.5f, numH * 0.5f, &srcRect, &color);
+		}
+
+		//×を表示
+		Math::Matrix xSclae = Math::Matrix::CreateScale(m_comboScale);
+		Math::Matrix xTrans = Math::Matrix::CreateTranslation(startX - 40.0f, startY, 0);
+		Math::Matrix xMat = xSclae * xTrans;
+		SHADER.m_spriteShader.SetMatrix(xMat);
+		Math::Rectangle xRect = { 0, 0, (long)numW, (long)numH };
+		SHADER.m_spriteShader.DrawTex(&m_NumberTex, 0, 0, 40, 40, &xRect);
+
+		SHADER.m_spriteShader.SetMatrix(comboMat);
+	}
+	
+}
+
+void GameScene::ComboUpdate()
+{
+	// ... 既存の更新処理 ...
+
+	if (m_playerPointer) 
+	{
+		int currentCombo = m_playerPointer->GetComboCount();
+
+		// --- コンボが増えた瞬間の検知 ---
+		if (currentCombo > m_lastComboCount) {
+			m_comboScale += (2.0f - m_comboScale) * 1.5f;
+			m_comboShake = (float)(rand() % 20 + 1); // 上にランダムに飛ばす
+		}
+		m_lastComboCount = currentCombo;
+
+		// --- 演出値の減衰 (自然に元の状態へ戻す) ---
+		// 1.0に向かって線形補間（Lerp）
+		m_comboScale += (1.0f - m_comboScale) * 0.15f;
+		// 0に向かって減衰
+		m_comboShake *= 0.85f;
 	}
 }

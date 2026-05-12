@@ -32,7 +32,6 @@ public:
 	}
 
 	// 素材のゲッターとセッター
-	int GetTotalMaterials() const { return m_totalMaterials; }
 	int  GetCurrentStage() const { return m_currentStage; }
 	int GetAtkLevel()       const { return m_atkLevel; }
 	int GetCritRateLevel()  const { return m_critRateLevel; }
@@ -42,7 +41,21 @@ public:
 	int GetCurrentDef() const { return m_currentDef; }
 	float GetAddedAtkPower() const { return m_addedAtkPower; }
 	float GetAddedCritRate() const { return m_addedCritRate; }
+
+	// --素材系の関数--
+	int GetTotalMaterials() const { return m_totalMaterials; }	// 現在の所持数を確認する関数
 	void AddMaterials(int amount) { m_totalMaterials += amount; }
+	void SubMaterials(int _amount)
+	{
+		m_totalMaterials -= _amount;
+
+		// 念のため 0 未満にならないようにガード
+		if (m_totalMaterials < 0) {
+			m_totalMaterials = 0;
+		}
+	}
+
+
 	int GetBulletSpeedLevel() const { return m_bulletSpeedLevel; }
 	float GetCurrentBulletSpeed() const {
 		return m_baseBulletSpeed + (m_bulletSpeedLevel * 1.5f); // 1レべごとに1.5アップ
@@ -234,7 +247,7 @@ private:
 
 
 	int m_RewardMaterials = 100; // クリア報酬でもらえる素材数。
-	int m_totalMaterials = 0; // ここに累計の素材数が貯まる
+	int m_totalMaterials = 1000; // ここに累計の素材数が貯まる
 	int m_currentStage = 1; // 1からスタート
 
 	long long m_currentAtk = 0; // ここに保存される

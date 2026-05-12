@@ -141,7 +141,7 @@ void Player::SetType(int id, int stageLevel)
 
 		// 各ステータスに倍率を適用
 		// HPの更新
-		m_PlayerParam.maxHp = (long long)(m_PlayerParam.maxHp * (totalScale) * myHpMult);
+		m_PlayerParam.maxHp = (long long)(m_PlayerParam.maxHp * (totalScale + 2.4f) * myHpMult);
 		m_PlayerParam.nowHp = m_PlayerParam.maxHp;
 
 		//防御更新

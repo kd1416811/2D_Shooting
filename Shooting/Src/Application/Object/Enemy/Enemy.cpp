@@ -225,7 +225,7 @@ void Enemy::DrawHpBar()
 		currentBarIdx--;
 	}
 	//画面中央の一番上に表示
-	Math::Vector3 barPos = { -380.0f, 300.0f, 0.0f };
+	Math::Vector3 barPos = { -410.0f, 300.0f, 0.0f };
 	Math::Vector2 pivotLeft = { 0.0f, 1.0f }; // 左端を基準にする
 
 	// 色リスト

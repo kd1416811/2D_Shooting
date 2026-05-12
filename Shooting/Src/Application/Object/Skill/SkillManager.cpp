@@ -31,7 +31,7 @@ void SkillManager::Init()
 			BASE_SKILL_COST,
 			param.pos,
 			param.radius,
-			{ 0.5f,0.5f,1.0f,0.2f },
+			{ 0.0f,0.0f,0.0f,0.5f },
 			GaugeType::Cooldown,
 			false);
 
@@ -61,6 +61,10 @@ void SkillManager::Init()
 	Frame = 0;
 
 	m_costTex.Load("Textures/costUI2.png");
+	m_homingTex.Load("Textures/Homing2.png");
+	m_WaveTex.Load("Textures/Wave2.png");
+	m_AtkTex.Load("Textures/Atk2.png");
+	m_CritTex.Load("Textures/Critical2.png");
 }
 
 SkillType SkillManager::Update()
@@ -104,6 +108,10 @@ SkillType SkillManager::Update()
 
 
 	m_mat = Math::Matrix::CreateTranslation(m_pos.x, m_pos.y + ULTparam.pos.y, 0);
+	m_homingMat = Math::Matrix::CreateTranslation(m_pos.x - 250, m_pos.y + ULTparam.pos.y, 0);
+	m_WaveMat = Math::Matrix::CreateTranslation(m_pos.x -150, m_pos.y + ULTparam.pos.y, 0);
+	m_AtkMat = Math::Matrix::CreateTranslation(m_pos.x + 150, m_pos.y + ULTparam.pos.y, 0);
+	m_CritMat = Math::Matrix::CreateTranslation(m_pos.x + 250, m_pos.y + ULTparam.pos.y, 0);
 
 	Frame++;
 
@@ -116,8 +124,16 @@ void SkillManager::Draw()
 	// --- 1. 背景テクスチャの描画 ---
 	SHADER.m_spriteShader.SetMatrix(m_mat);
 	SHADER.m_spriteShader.DrawTex(&m_costTex, Math::Rectangle{ 100,0,100,100 }, 1.0f);
+	SHADER.m_spriteShader.SetMatrix(m_homingMat);
+	SHADER.m_spriteShader.DrawTex(&m_homingTex, Math::Rectangle{ 0,0,80,80 }, 1.0f);
+	SHADER.m_spriteShader.SetMatrix(m_WaveMat);
+	SHADER.m_spriteShader.DrawTex(&m_WaveTex, Math::Rectangle{ 0,0,80,80 }, 1.0f);
+	SHADER.m_spriteShader.SetMatrix(m_AtkMat);
+	SHADER.m_spriteShader.DrawTex(&m_AtkTex, Math::Rectangle{ 0,0,80,80 }, 1.0f);
+	SHADER.m_spriteShader.SetMatrix(m_CritMat);
+	SHADER.m_spriteShader.DrawTex(&m_CritTex, Math::Rectangle{ 0,0,80,80 }, 1.0f);
 
-	color = { 0,0,0,0.2f };
+	//color = { 0,0,0,1.0f };
 
 	// --- 2. ゲージ（中身）の描画 ---
 	// 行列をリセット
@@ -141,6 +157,7 @@ void SkillManager::Draw()
 	// ゲージの上に重ねたい装飾やアイコンがあればここで描画
 	SHADER.m_spriteShader.SetMatrix(m_mat);
 	SHADER.m_spriteShader.DrawTex(&m_costTex, Math::Rectangle{ 0,0,100,100 }, 1.0f);
+	
 }
 
 //=========================--
