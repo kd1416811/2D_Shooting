@@ -67,6 +67,24 @@
     <Filter Include="Src\Application\Concept">
       <UniqueIdentifier>{a9702207-f549-4382-9c6d-3d87643d6afc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\Object\Bullet\BulletType">
+      <UniqueIdentifier>{dd1987c8-c7a4-4003-b2f2-c98a7ca99bf8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\Background">
+      <UniqueIdentifier>{c9898785-5ff5-4ece-b465-ada71cb9d39c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\Background\Space">
+      <UniqueIdentifier>{245eabde-a5cd-4208-b114-c135212b5e16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\Background\Cloud">
+      <UniqueIdentifier>{46defc01-b8f0-4808-9833-8085270b53d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\Background\Abyss">
+      <UniqueIdentifier>{4d29de2d-69a2-422c-8e81-374189da549b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\Animation">
+      <UniqueIdentifier>{c5787d5e-877b-419a-b2da-591dfd84b151}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -192,6 +210,48 @@
     <ClInclude Include="Src\Application\Concept\DamageCalculation.h">
       <Filter>Src\Application\Concept</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Object\Bullet\MoveStrategy.h">
+      <Filter>Src\Application\Object\Bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Bullet\BulletType\MoveHoming.h">
+      <Filter>Src\Application\Object\Bullet\BulletType</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Bullet\BulletType\MoveWave.h">
+      <Filter>Src\Application\Object\Bullet\BulletType</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Background\BackgroundBase.h">
+      <Filter>Src\Application\Object\Background</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Background\Space\SpaceBackground.h">
+      <Filter>Src\Application\Object\Background\Space</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Background\Cloud\CloudBackground.h">
+      <Filter>Src\Application\Object\Background\Cloud</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Background\Abyss\AbyssBackground.h">
+      <Filter>Src\Application\Object\Background\Abyss</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Animation\explosion.h">
+      <Filter>Src\Application\Object\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Bullet\BulletType\MoveUltimate.h">
+      <Filter>Src\Application\Object\Bullet\BulletType</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Scene\SceneManager.h">
+      <Filter>Src\Application\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Scene\TitleScene.h">
+      <Filter>Src\Application\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Scene\ResultScene.h">
+      <Filter>Src\Application\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Scene\BaseScene.h">
+      <Filter>Src\Application\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Enemy\EnemyDeathAnim.h">
+      <Filter>Src\Application\Object\Enemy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -283,6 +343,48 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Concept\DamageCalculation.cpp">
       <Filter>Src\Application\Concept</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Bullet\MoveStrategy.cpp">
+      <Filter>Src\Application\Object\Bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Bullet\BulletType\MoveHoming.cpp">
+      <Filter>Src\Application\Object\Bullet\BulletType</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Bullet\BulletType\MoveWave.cpp">
+      <Filter>Src\Application\Object\Bullet\BulletType</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Background\BackgroundBase.cpp">
+      <Filter>Src\Application\Object\Background</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Background\Space\SpaceBackground.cpp">
+      <Filter>Src\Application\Object\Background\Space</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Background\Cloud\CloudBackground.cpp">
+      <Filter>Src\Application\Object\Background\Cloud</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Background\Abyss\AbyssBackground.cpp">
+      <Filter>Src\Application\Object\Background\Abyss</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Animation\explosion.cpp">
+      <Filter>Src\Application\Object\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Bullet\BulletType\MoveUltimate.cpp">
+      <Filter>Src\Application\Object\Bullet\BulletType</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Scene\SceneManager.cpp">
+      <Filter>Src\Application\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Scene\TitleScene.cpp">
+      <Filter>Src\Application\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Scene\ResultScene.cpp">
+      <Filter>Src\Application\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Scene\BaseScene.cpp">
+      <Filter>Src\Application\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Enemy\EnemyDeathAnim.cpp">
+      <Filter>Src\Application\Object\Enemy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

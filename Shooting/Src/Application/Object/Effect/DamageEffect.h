@@ -12,7 +12,9 @@ public:
 	void Draw()override;
 	void Update()override;
 
-	void SetDamage(long long damage, const Math::Vector3& pos, bool b_critical);
+	void SetDamage(long long damage, const Math::Vector3& pos, bool b_critical,float speedRate = 1.0f);
+
+	void SetColor(const Math::Color& col) { m_color = col; }	
 
 private:
 
@@ -21,6 +23,8 @@ private:
 
 	long long m_damage;
 	bool m_criticalFlg;
+
+	Math::Color m_color;
 
 	static KdTexture s_numberTex;
 };

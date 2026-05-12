@@ -31,7 +31,7 @@ void SkillManager::Init()
 			BASE_SKILL_COST,
 			param.pos,
 			param.radius,
-			{ 0,0,0,0.2f },
+			{ 0.5f,0.5f,1.0f,0.2f },
 			GaugeType::Cooldown,
 			false);
 
@@ -60,38 +60,54 @@ void SkillManager::Init()
 
 	Frame = 0;
 
-	//m_costTex.Load("texture/costUI2.png");
+	m_costTex.Load("Textures/costUI2.png");
 }
 
-void SkillManager::Update()
+SkillType SkillManager::Update()
 {
+
+
+	SkillType ActiveType = SkillType::None;
+
 	//===========================================
 	// 通常スキル用
 	// ==========================================
 
 	// 全スキルをループで回す
-	for (auto& gauge : m_skillGauge)
+	for (int i = 0; i < SKILL_COUNT; i++)
 	{
-		if (gauge->Update()) 
+		if (m_skillGauge[i]->Update())
 		{
 			m_ultGauge->AddCost(1.0f);
+
+			// インデックスに応じてスキルタイプを設定
+			if (i == 0) ActiveType = SkillType::Q;
+			if (i == 1) ActiveType = SkillType::W;
+			if (i == 2) ActiveType = SkillType::E;
+			if (i == 3) ActiveType = SkillType::R;
 		}
 	}
 
 	//===============================================
 	// ウルト用
 	//=============================================== 
+	const auto& ULTparam = G_ULTParam;
 
 	//ウルトゲージを使う
 	if (m_ultGauge->IsFull())
 	{
-		m_ultGauge->Update();
+		if (m_ultGauge->Update())
+		{
+			ActiveType = SkillType::ULT;
+		}
 	}
 
 
-	m_mat = Math::Matrix::CreateTranslation(m_pos.x, m_pos.y, 0);
+	m_mat = Math::Matrix::CreateTranslation(m_pos.x, m_pos.y + ULTparam.pos.y, 0);
 
 	Frame++;
+
+	return ActiveType;
 }
 
 
@@ -99,7 +115,7 @@ void SkillManager::Draw()
 {
 	// --- 1. 背景テクスチャの描画 ---
 	SHADER.m_spriteShader.SetMatrix(m_mat);
-	SHADER.m_spriteShader.DrawTex(&m_costTex, Math::Rectangle{ 300,0,300,302 }, 1.0f);
+	SHADER.m_spriteShader.DrawTex(&m_costTex, Math::Rectangle{ 100,0,100,100 }, 1.0f);
 
 	color = { 0,0,0,0.2f };
 
@@ -124,7 +140,7 @@ void SkillManager::Draw()
 	// --- 3. 前面（飾り）の描画 ---
 	// ゲージの上に重ねたい装飾やアイコンがあればここで描画
 	SHADER.m_spriteShader.SetMatrix(m_mat);
-	SHADER.m_spriteShader.DrawTex(&m_costTex, Math::Rectangle{ 0,0,300,302 }, 1.0f);
+	SHADER.m_spriteShader.DrawTex(&m_costTex, Math::Rectangle{ 0,0,100,100 }, 1.0f);
 }
 
 //=========================--

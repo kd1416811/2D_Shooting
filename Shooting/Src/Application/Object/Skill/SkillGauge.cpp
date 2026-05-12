@@ -95,7 +95,7 @@ void SkillGauge::Draw(const Math::Vector2* vertices, float startDeg, bool showMe
 	{
 		// 半径の 20% を目盛りの長さにする
 		float tickLength = m_radius.x * 0.2f;
-		Math::Color ULTLineCol{ 0, 0, 0, 0.7f };
+		Math::Color ULTLineCol{ 1, 1, 1, 1.0f };
 
 		for (int i = 0; i < (int)m_maxCost; i++) {
 			float currentDeg = (360.0f / m_maxCost * i) + startDeg;

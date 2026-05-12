@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 //前方宣言
-class gameScene;
+class GameScene;
 
 class BaseObject
 {
@@ -12,7 +12,9 @@ public:
 		player,
 		enemy,
 		bullet,
-		damageEffect
+		enemyBullet,
+		damageEffect,
+		enemyDeathEffect
 	};
 
 	BaseObject() {}
@@ -24,13 +26,19 @@ public:
 	
 	virtual void OnHit(long long damage) { (void)damage; }
 
-	virtual void SetOwner(gameScene* _owner) {}
+	virtual void SetOwner(GameScene* _owner) {}
+
+	
 
 	float One_Half(float v) { return v * 0.5f; }
 
 	const	objectType&		GetObjType()	{ return m_objType; }
 	const	Math::Vector3&	GetPos()		{ return m_pos; }
 	const	bool&			GetAliveFlg()	{ return m_aliveFlg; }
+
+
+	void SetObjType(objectType type) { m_objType = type; }
+	objectType GetObjType() const { return m_objType; }
 
 protected:
 
@@ -44,7 +52,9 @@ protected:
 	Math::Vector3	m_pos = {};
 	Math::Vector3   m_dir = {}; //移動方向
 	int				m_deg;		//角度
+	int				m_charaSizeRatio;	//キャラサイズ
 	int				m_lifeTime;
+	float			m_animCnt;
 	float			m_shotInterval;		
 	float			m_ObjScale;
 	float			m_speed;
@@ -55,5 +65,5 @@ protected:
 
 	objectType		m_objType = objectType::None;
 
-	gameScene*		m_owner = nullptr;
+	GameScene*		m_owner = nullptr;
 };

@@ -1,21 +1,23 @@
 #include "main.h"
 #include "Scene.h"
 #include"Scene/GameScene.h"
+#include"Scene/SceneManager.h"
 
 void Scene::Draw2D()
 {
-	gameScene::Instance().Draw();
+	SceneManager::Instance().Draw();
 }
 
 void Scene::Update()
 {
-	gameScene::Instance().Update();
+	SceneManager::Instance().PreUpdate();
+	SceneManager::Instance().Update();
 }
 
 void Scene::Init()
 {
-	gameScene::Instance().Init();
 }
+
 
 void Scene::Release()
 {

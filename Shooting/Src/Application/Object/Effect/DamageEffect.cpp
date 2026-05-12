@@ -12,6 +12,7 @@ void DamageEffect::Init()
 	m_ObjScale = 1.0f;
 	m_criticalFlg = false;
 	m_aliveFlg = true;
+	m_color = { 1.0f,1.0f,0.0f,1.0f };//初期は白色
 	s_numberTex.Load("Textures/number2.png");
 	srand(timeGetTime());
 
@@ -41,7 +42,7 @@ void DamageEffect::Draw()
 
 	// --１文字ずつループ描画--
 	float totalW = damageStr.length() * (numW * 0.4f); // 0.4fは重なり具合の調整
-	float currentX = m_pos.x - (totalW /2.0f);
+	float currentX = m_pos.x - (totalW / 2.0f);
 
 	for (char c : damageStr)
 	{
@@ -81,7 +82,7 @@ void DamageEffect::Draw()
 		// 行列をセットした後は、座標(0,0)描画する
 		if (!m_criticalFlg)
 		{
-			SHADER.m_spriteShader.DrawTex(&s_numberTex, 0, 0, One_Half(numW), One_Half(numH), &rect, &col, pivot);
+			SHADER.m_spriteShader.DrawTex(&s_numberTex, 0, 0, One_Half(numW), One_Half(numH), &rect, &m_color, pivot);
 		}
 		else
 		{
@@ -112,13 +113,14 @@ void DamageEffect::Update()
 	m_mat = m_scale * m_trans;
 }
 
-void DamageEffect::SetDamage(long long damage, const Math::Vector3 & pos, bool b_critical)
+void DamageEffect::SetDamage(long long damage, const Math::Vector3 & pos, bool b_critical, float speedRate)
 {
 	m_damage = damage;
 	m_pos = pos;
 	m_pos.x += (rand() % 60) - 30;
 	m_pos.y += 30;
 	m_criticalFlg = b_critical;
+	m_speed = 2.0f * speedRate;
 }
 
 std::string DamageEffect::FormatComma(long long value)
